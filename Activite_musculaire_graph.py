@@ -1,5 +1,5 @@
 import os
-os.chdir(r"C:\Users\p0137717\Documents\Python")
+os.chdir(r"C:\Users\Documents\Python")
 import pandas as pd
 import numpy as np
 import seaborn as sns  
