@@ -1,3 +1,5 @@
+Test console, doesn t work
+
 import os
 import sys
 import importlib.util
