@@ -26,7 +26,7 @@ def _load_results_with_selection():
     import os
     
     # Directory for saved simulations
-    SaveSimulationsDirectory = "C:/Users/p0137717/Documents/Python/Saved Simulations"
+    SaveSimulationsDirectory = "C:/Users/Documents/Python/Saved Simulations"
     
     # If a selection file is specified, use it
     if SELECTED_RESULTS_FILE and os.path.exists(SELECTED_RESULTS_FILE):
