@@ -421,7 +421,7 @@ class AnalysisLauncher:
         """
         try:
             # Vérifier si le fichier existe
-            chemin_complet = os.path.join(r"C:\Users\p0137717\Documents\Python", f"{nom_fichier}.py")
+            chemin_complet = os.path.join(r"C:\Users\Documents\Python", f"{nom_fichier}.py")
             if not os.path.exists(chemin_complet):
                 print(f"Erreur: Le fichier {chemin_complet} n'existe pas.")
                 return None
@@ -444,7 +444,7 @@ class AnalysisLauncher:
     def lancer_activite_musculaire(self):
         try:
             import os
-            os.chdir(r"C:\Users\p0137717\Documents\Python")
+            os.chdir(r"C:\Users\Documents\Python")
             
             # Importer le module force musculaire 
             module = self.importer_module("Activite_musculaire_graph")
@@ -464,7 +464,7 @@ class AnalysisLauncher:
     def lancer_translations_apis(self):
         try:
             import os
-            os.chdir(r"C:\Users\p0137717\Documents\Python")
+            os.chdir(r"C:\Users\Documents\Python")
             
             # Importer le module Translation_APIS_Graph (singulier, pas pluriel)
             module = self.importer_module("Translation_APIS_Graph")
@@ -479,7 +479,7 @@ class AnalysisLauncher:
     def lancer_ratio_instabilite(self):
         try:
             import os
-            os.chdir(r"C:\Users\p0137717\Documents\Python")
+            os.chdir(r"C:\Users\Documents\Python")
             
             # Importer le module Ratio_instabilite_graph
             module = self.importer_module("Ratio_instabilite_graph")
