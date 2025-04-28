@@ -67,7 +67,7 @@ matplotlib.rcParams.update({'ytick.labelsize': 14})
 matplotlib.rcParams.update({'legend.fontsize': 14})
 
 # %% Load results
-SaveSimulationsDirectory = "C:/Users/p0137717/Documents/Python/Saved Simulations"
+SaveSimulationsDirectory = "C:/Users/Documents/Python/Saved Simulations"
 Results = load_results_from_file(SaveSimulationsDirectory, "Results")
 
 # %% Control the font size for graphs
