@@ -50,7 +50,7 @@ Results = _load_results_with_selection()
 
 
 # Path to the directory for saving simulations
-SaveSimulationsDirectory = "C:/Users/p0137717/Documents/Python/Saved Simulations"
+SaveSimulationsDirectory = "C:/Users/Documents/Python/Saved Simulations"
 
 # Load results
 Results = load_results_from_file(SaveSimulationsDirectory, "Results")
