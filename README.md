@@ -1,5 +1,4 @@
 # Anybody_graph
-Creation de graph a partir du github de Dan avec tous les packages : 
+Creating graphs using Dan's GitHub repository containing all packages:
 https://github.com/dansoyeux/Anybody_Package
-
-Don't forget to change the path 
+Don't forget to modify the path ! 
