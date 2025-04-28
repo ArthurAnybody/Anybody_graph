@@ -1,5 +1,5 @@
 import os
-os.chdir(r"C:\Users\p0137717\Documents\Python")
+os.chdir(r"C:\Users\Documents\Python")
 
 from Anybody_Package.Anybody_LoadOutput.Tools import load_results_from_file
 from Anybody_Package.Anybody_Graph.GraphFunctions import graph
