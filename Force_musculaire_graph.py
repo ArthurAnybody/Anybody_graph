@@ -1,5 +1,5 @@
 import os
-os.chdir(r"C:\Documents\Python") # chemin a modfier
+os.chdir(r"C:\Users\Documents\Python")# chemin a modfier
 import pandas as pd
 import numpy as np
 import seaborn as sns  
@@ -25,7 +25,7 @@ SELECTED_RESULTS_FILE = None
 
 
 # %% Load results
-SaveSimulationsDirectory = "C:/Users/Documents/Python/Saved Simulations"# chemin a modfier
+SaveSimulationsDirectory = "C:/Users/Documents/Python/Saved Simulations")# chemin a modfier
 Results = load_results_from_file(SaveSimulationsDirectory, "Results")
 
 # %% List of muscle categories
@@ -100,7 +100,7 @@ def _load_results_with_selection():
     import os
     
     # Directory for saved simulations
-    SaveSimulationsDirectory = "C:/Users/Documents/Python/Saved Simulations" # chemin a modfier
+    SaveSimulationsDirectory = "C:/Users/Documents/Python/Saved Simulations")# chemin a modfier
     
     # If a selection file is specified, use it
     if SELECTED_RESULTS_FILE and os.path.exists(SELECTED_RESULTS_FILE):
@@ -131,10 +131,6 @@ matplotlib.rcParams.update({'axes.labelsize': 14})
 matplotlib.rcParams.update({'xtick.labelsize': 14})
 matplotlib.rcParams.update({'ytick.labelsize': 14})
 matplotlib.rcParams.update({'legend.fontsize': 14})
-
-# %% Load results
-SaveSimulationsDirectory = "C:/Users/Documents/Python/Saved Simulations" # chemin a modfier
-Results = load_results_from_file(SaveSimulationsDirectory, "Results")
 
 
 # %% Identification of reference case and all cases to compare
@@ -514,43 +510,6 @@ def generate_all_difference_graphs(muscles_to_analyze=None):
     
     print("\nAll difference graphs have been generated.")   
     
-# Variable to store the path to a file with selected results
-SELECTED_RESULTS_FILE = None
-
-# Modified function for loading results
-def _load_results_with_selection():
-    """
-    Load simulation results with the option to use a specific selection file.
-    If a selection file is specified, it uses that; otherwise, it loads the default results.
-    
-    Returns:
-        The loaded simulation results
-    """
-    import pickle
-    import os
-    
-    # Directory for saved simulations
-    SaveSimulationsDirectory = "C:/Users/Documents/Python/Saved Simulations" # chemin a modfier
-    
-    # If a selection file is specified, use it
-    if SELECTED_RESULTS_FILE and os.path.exists(SELECTED_RESULTS_FILE):
-        try:
-            with open(SELECTED_RESULTS_FILE, 'rb') as f:
-                return pickle.load(f)
-        except Exception as e:
-            print(f"Error loading selection: {e}")
-    
-    # Otherwise, load results normally
-    try:
-        ResultsFile = os.path.join(SaveSimulationsDirectory, "Results.pkl")
-        with open(ResultsFile, 'rb') as f:
-            return pickle.load(f)
-    except Exception as e:
-        print(f"Error loading results: {e}")
-        return None
-
-# Load results with selection handling
-Results = _load_results_with_selection()
 
 # %% Control the font size for graphs
 matplotlib.rcParams.update({'font.size': 12})
@@ -560,11 +519,6 @@ matplotlib.rcParams.update({'axes.labelsize': 12})
 matplotlib.rcParams.update({'xtick.labelsize': 10})
 matplotlib.rcParams.update({'ytick.labelsize': 10})
 matplotlib.rcParams.update({'legend.fontsize': 10})
-
-# %% Load results
-SaveSimulationsDirectory = "C:/Users/p0137717/Documents/Python/Saved Simulations"
-Results = load_results_from_file(SaveSimulationsDirectory, "Results")
-
 
 # %% Data extraction for all cases
 def extract_all_cases_data(results, muscles, angle_ranges):
@@ -740,4 +694,5 @@ if __name__ == "__main__":
     generate_all_difference_graphs(Muscles_Main)
     # generate_all_difference_graphs(Muscles_Aux)
     # generate_all_difference_graphs(Muscles_Extra)
+
 
