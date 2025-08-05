@@ -1,5 +1,5 @@
 import os
-os.chdir(r"C:\Users\Documents\Python")
+os.chdir(r"C:\Documents\Python") # chemin a modfier
 import pandas as pd
 import numpy as np
 import seaborn as sns  
@@ -17,9 +17,75 @@ from Anybody_Package.Anybody_Graph.GraphFunctions import ForceMeasure_bar_plot_d
 from Anybody_Package.Anybody_Graph import PremadeGraphs
 import matplotlib
 import matplotlib.pyplot as plt
+from type_colors import FIXED_TYPE_COLORS
 
 # Variable to store the path to a file with selected results
 SELECTED_RESULTS_FILE = None
+
+
+
+# %% Load results
+SaveSimulationsDirectory = "C:/Users/Documents/Python/Saved Simulations"# chemin a modfier
+Results = load_results_from_file(SaveSimulationsDirectory, "Results")
+
+# %% List of muscle categories
+Muscles_Main = [
+    "Deltoideus anterior",
+    "Deltoideus lateral",
+    "Deltoideus posterior",
+    "Infraspinatus",
+    "Supraspinatus",
+    "Subscapularis",
+    "Teres minor",
+    # "Lower trapezius",
+    # "Middle trapezius",
+    # "Upper trapezius",
+    "Trapezius",
+    
+    # "Biceps brachii long head",  ## Activer ou désactiver ce muscle pour affiche le graphique differences % entre ref et le type
+    # "Biceps brachii short head", 
+    "Biceps brachii", ## le biceps brachii sera Inactif si vous laisser ce muscle dans le le graphique differences % entre ref et le type
+]
+ 
+Muscles_Aux = [
+    "Pectoralis major clavicular",
+    "Pectoralis major sternal",
+    "Pectoralis minor",
+    "Teres major",
+    "Teres minor",
+    "Rhomboideus",
+    "Serratus anterior",
+    # "Biceps brachii long head",
+    # "Biceps brachii short head"
+]
+
+Muscles_Extra = [
+    "Sternocleidomastoid sternum",
+    "Sternocleidomastoid clavicular",
+    "Latissimus dorsi",
+    "Levator scapulae",
+    "Coracobrachialis",
+    "Triceps long head",
+]
+
+def get_type_colors(type_cases):
+    type_colors = {}
+    for type_key, case_name in type_cases.items():
+        if case_name in FIXED_TYPE_COLORS:
+            type_colors[type_key] = FIXED_TYPE_COLORS[case_name]
+        elif type_key == 'Reference':
+            type_colors[type_key] = FIXED_TYPE_COLORS['Reference']
+        else:
+            type_colors[type_key] = '#cccccc'  # couleur par défaut
+    return type_colors
+
+def reorder_cases(cases):
+    """
+    Trie les cas avec 'Reference' en premier, suivi de Type A à E
+    """
+    order = ["Reference", "Type A", "Type B", "Type C", "Type D", "Type E"]
+    return sorted(cases, key=lambda c: order.index(c) if c in order else 999)
+
 
 # Modified function for loading results
 def _load_results_with_selection():
@@ -34,7 +100,7 @@ def _load_results_with_selection():
     import os
     
     # Directory for saved simulations
-    SaveSimulationsDirectory = "C:/Users/Documents/Python/Saved Simulations"
+    SaveSimulationsDirectory = "C:/Users/Documents/Python/Saved Simulations" # chemin a modfier
     
     # If a selection file is specified, use it
     if SELECTED_RESULTS_FILE and os.path.exists(SELECTED_RESULTS_FILE):
@@ -67,46 +133,9 @@ matplotlib.rcParams.update({'ytick.labelsize': 14})
 matplotlib.rcParams.update({'legend.fontsize': 14})
 
 # %% Load results
-SaveSimulationsDirectory = "C:/Users/Documents/Python/Saved Simulations"
+SaveSimulationsDirectory = "C:/Users/Documents/Python/Saved Simulations" # chemin a modfier
 Results = load_results_from_file(SaveSimulationsDirectory, "Results")
 
-# %% List of muscle categories
-Muscles_Main = [
-    "Deltoideus anterior",
-    "Deltoideus lateral",
-    "Deltoideus posterior",
-    "Infraspinatus",
-    "Supraspinatus",
-    "Subscapularis",
-    # "Teres minor",
-    "Lower trapezius",
-    "Middle trapezius",
-    "Upper trapezius",
-    # "Biceps brachii long head",
-    # "Biceps brachii short head",
-  
-    ]
- 
-Muscles_Aux = [
-    "Pectoralis major clavicular",
-    "Pectoralis major sternal",
-    "Pectoralis minor",
-    "Teres major",
-    "Teres minor",
-    "Rhomboideus",
-    "Serratus anterior",
-    "Biceps brachii long head",
-    "Biceps brachii short head"
-]
-
-Muscles_Extra = [
-    "Sternocleidomastoid sternum",
-    "Sternocleidomastoid clavicular",
-    "Latissimus dorsi",
-    "Levator scapulae",
-    "Coracobrachialis",
-    "Triceps long head",
-]
 
 # %% Identification of reference case and all cases to compare
 def identify_reference_and_compare_cases(results):
@@ -311,14 +340,14 @@ def create_percentage_diff_heatmap(percentage_diff, activity_status, ref_case, c
     # Cap extreme values for visualization
     df_diff = df_diff.clip(lower=-100, upper=1000)
     
-    # Create a version for textual display of percentages with average values in Newton
+    # Create a version for textual display of percentages with force differences
     df_display = pd.DataFrame(index=df_diff.index, columns=df_diff.columns, dtype=object)
     df_display = df_display.fillna("")
     
     # Keep track of completely inactive muscles
     inactive_muscles = set()
     
-    # Format percentages for display and add values in Newton
+    # Format percentages for display and add force differences
     for muscle in muscles:
         # Check if muscle is completely inactive
         all_inactive = False
@@ -339,21 +368,24 @@ def create_percentage_diff_heatmap(percentage_diff, activity_status, ref_case, c
             status = activity_status[muscle][i]
             diff_val = percentage_diff[muscle][i]
             
+            # Calculate force difference
+            force_diff = comp_val - ref_val
+            
             # Format based on status
             if status == "muscle_inactive":
-                df_display.loc[muscle, col] = f"Inactive\n({ref_val:.1f}N / {comp_val:.1f}N)"
+                df_display.loc[muscle, col] = "Inactive"
             elif status == "zero":
-                # Just display 0% for zero values
-                df_display.loc[muscle, col] = f"0.0%\n({ref_val:.1f}N / {comp_val:.1f}N)"
+                # Just display 0% for zero values with force difference
+                df_display.loc[muscle, col] = f"0.0%\n({force_diff:+.0f}N)"
             elif status == "normal":
                 # For very high values, cap the displayed percentage
                 if diff_val > 999:
-                    df_display.loc[muscle, col] = f">999%\n({ref_val:.1f}N / {comp_val:.1f}N)"
+                    df_display.loc[muscle, col] = f">999%\n({force_diff:+.0f}N)"
                 else:
-                    df_display.loc[muscle, col] = f"{diff_val:.2f}%\n({ref_val:.1f}N / {comp_val:.1f}N)"
+                    df_display.loc[muscle, col] = f"{diff_val:.0f}%\n({force_diff:+.0f}N)"
             else:
                 # Fallback for unexpected status
-                df_display.loc[muscle, col] = f"??\n({ref_val:.1f}N / {comp_val:.1f}N)"
+                df_display.loc[muscle, col] = f"??\n({force_diff:+.0f}N)"
     
     # Create the figure
     plt.figure(figsize=(14, 10))  # Increase size to accommodate more text
@@ -382,8 +414,8 @@ def create_percentage_diff_heatmap(percentage_diff, activity_status, ref_case, c
                     (col_idx, row_idx),  # Position (x, y) of the bottom left corner
                     1, 1,                # Width and height of the rectangle
                     fill=True,
-                    color='lightgrey',
-                    alpha=0.5,           # Opacity
+                    color='darkgrey',
+                    alpha=0.8,           # Opacity
                     zorder=2             # Ensure the rectangle is above the heatmap
                 )
                 ax.add_patch(rect)
@@ -482,13 +514,230 @@ def generate_all_difference_graphs(muscles_to_analyze=None):
     
     print("\nAll difference graphs have been generated.")   
     
+# Variable to store the path to a file with selected results
+SELECTED_RESULTS_FILE = None
 
-# %% Main execution
+# Modified function for loading results
+def _load_results_with_selection():
+    """
+    Load simulation results with the option to use a specific selection file.
+    If a selection file is specified, it uses that; otherwise, it loads the default results.
+    
+    Returns:
+        The loaded simulation results
+    """
+    import pickle
+    import os
+    
+    # Directory for saved simulations
+    SaveSimulationsDirectory = "C:/Users/Documents/Python/Saved Simulations" # chemin a modfier
+    
+    # If a selection file is specified, use it
+    if SELECTED_RESULTS_FILE and os.path.exists(SELECTED_RESULTS_FILE):
+        try:
+            with open(SELECTED_RESULTS_FILE, 'rb') as f:
+                return pickle.load(f)
+        except Exception as e:
+            print(f"Error loading selection: {e}")
+    
+    # Otherwise, load results normally
+    try:
+        ResultsFile = os.path.join(SaveSimulationsDirectory, "Results.pkl")
+        with open(ResultsFile, 'rb') as f:
+            return pickle.load(f)
+    except Exception as e:
+        print(f"Error loading results: {e}")
+        return None
+
+# Load results with selection handling
+Results = _load_results_with_selection()
+
+# %% Control the font size for graphs
+matplotlib.rcParams.update({'font.size': 12})
+matplotlib.rcParams.update({'axes.titlesize': 14})
+matplotlib.rcParams.update({'figure.titlesize': 16})
+matplotlib.rcParams.update({'axes.labelsize': 12})
+matplotlib.rcParams.update({'xtick.labelsize': 10})
+matplotlib.rcParams.update({'ytick.labelsize': 10})
+matplotlib.rcParams.update({'legend.fontsize': 10})
+
+# %% Load results
+SaveSimulationsDirectory = "C:/Users/p0137717/Documents/Python/Saved Simulations"
+Results = load_results_from_file(SaveSimulationsDirectory, "Results")
+
+
+# %% Data extraction for all cases
+def extract_all_cases_data(results, muscles, angle_ranges):
+    all_cases_data = {}
+    available_cases = list(results.keys())
+
+    for case_name in available_cases:
+        case_data = {}
+
+        try:
+            abduction_angles = results[case_name]['Abduction']['Total']
+        except KeyError:
+            abduction_angles = []
+
+        for muscle in muscles:
+            case_data[muscle] = []
+
+            if muscle == "Biceps brachii":
+                try:
+                    long = results[case_name]["Muscles"]["Biceps brachii long head"]["Biceps brachii long head"]["Ft"]["Total"]
+                    short = results[case_name]["Muscles"]["Biceps brachii short head"]["Biceps brachii short head"]["Ft"]["Total"]
+                    if len(long) != len(abduction_angles) or len(short) != len(abduction_angles):
+                        case_data[muscle] = [0.0] * len(angle_ranges)
+                        continue
+                    combined = [l + s for l, s in zip(long, short)]
+                    for start, end in angle_ranges:
+                        indices = [i for i, a in enumerate(abduction_angles) if start <= a <= end]
+                        val = np.mean([combined[i] for i in indices]) if indices else 0.0
+                        case_data[muscle].append(val)
+                except KeyError:
+                    case_data[muscle] = [0.0] * len(angle_ranges)
+            else:
+                try:
+                    force_data = results[case_name]["Muscles"][muscle][muscle]["Ft"]["Total"]
+                    if len(force_data) != len(abduction_angles):
+                        case_data[muscle] = [0.0] * len(angle_ranges)
+                        continue
+                    for start, end in angle_ranges:
+                        indices = [i for i, a in enumerate(abduction_angles) if start <= a <= end]
+                        val = np.mean([force_data[i] for i in indices]) if indices else 0.0
+                        case_data[muscle].append(val)
+                except KeyError:
+                    case_data[muscle] = [0.0] * len(angle_ranges)
+
+        all_cases_data[case_name] = case_data
+
+    return all_cases_data
+
+
+def create_horizontal_bar_chart(all_cases_data, muscles, angle_ranges, case_colors):
+    import matplotlib.pyplot as plt
+    import matplotlib
+
+    # Set consistent font family and size globally
+    matplotlib.rcParams.update({
+        
+        'font.size': 14,
+        'axes.titlesize': 16,
+        'axes.labelsize': 14,
+        'xtick.labelsize': 12,
+        'ytick.labelsize': 12,
+        'legend.fontsize': 12
+    })
+
+    cases = reorder_cases(list(all_cases_data.keys()))
+
+    for idx, (start, end) in enumerate(angle_ranges):
+        # Wider and taller figure
+        fig, ax = plt.subplots(figsize=(14, max(10, len(muscles) * 0.8)))  
+        y_pos = np.arange(len(muscles))
+        width = 0.8 / len(cases)
+
+        for i, case in enumerate(cases):
+            forces = [all_cases_data[case][muscle][idx] for muscle in muscles]
+            y_offset = y_pos + (i - len(cases)/2 + 0.5) * width
+            color = case_colors.get(case, '#cccccc')
+
+            bars = ax.barh(y_offset, forces, width, label=case,
+                           color=color, alpha=0.8, edgecolor='black')
+
+            # Add value annotations
+            for bar, val in zip(bars, forces):
+                if val > 0.1:
+                    ax.text(bar.get_width() + 3, bar.get_y() + bar.get_height()/2.0,
+                            f'{round(val)}', va='center', ha='left', fontsize=12)
+
+        ax.set_title(f'Muscle Forces – Angles {start}° to {end}°', fontweight='bold', pad=15)
+        ax.set_xlabel("Force (N)")
+        ax.set_ylabel("Muscles")
+        ax.set_yticks(y_pos)
+        ax.set_yticklabels(muscles, fontsize=13)
+        ax.invert_yaxis()
+        ax.grid(True, axis='x', alpha=0.3)
+        ax.set_xlim(left=0)
+
+        # Adjust legend outside plot
+        ax.legend(title="Cases", title_fontsize=13, bbox_to_anchor=(1.02, 1), loc='upper left', borderaxespad=0.)
+        
+        plt.tight_layout()
+        plt.show()
+
+
+
+def create_summary_bar_chart(all_cases_data, muscles, angle_ranges, case_colors):
+    cases = reorder_cases(list(all_cases_data.keys()))
+    case_totals = {case: sum(all_cases_data[case][m][i]
+                     for m in muscles for i in range(len(angle_ranges))) for case in cases}
+
+    muscle_means = {
+        m: np.mean([all_cases_data[c][m][i]
+        for c in cases for i in range(len(angle_ranges))]) for m in muscles
+    }
+
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 8))
+
+    # Total par cas
+    colors = [case_colors.get(c, '#ccc') for c in cases]
+    bars1 = ax1.bar(cases, [case_totals[c] for c in cases], color=colors,
+                    edgecolor='black', linewidth=1)
+    for bar, val in zip(bars1, [case_totals[c] for c in cases]):
+        ax1.text(bar.get_x() + bar.get_width()/2., bar.get_height() + 0.01,
+                 f'{round(val)}', ha='center', va='bottom', fontsize=10)
+    ax1.set_title("Force Totale par Cas", fontsize=14, fontweight='bold')
+    ax1.set_xlabel("Cas")
+    ax1.set_ylabel("Force (N)")
+    ax1.grid(True, axis='y', alpha=0.3)
+    ax1.set_xticklabels(cases, rotation=45, ha='right')
+
+    # Top 8 muscles
+    top = sorted(muscle_means.items(), key=lambda x: x[1], reverse=True)[:8]
+    names = [m[:15] + '...' if len(m) > 15 else m for m, _ in top]
+    values = [v for _, v in top]
+    bars2 = ax2.barh(names, values, color=plt.cm.Set3(np.linspace(0, 1, 8)),
+                     edgecolor='black', linewidth=1)
+    for bar, val in zip(bars2, values):
+        ax2.text(bar.get_width() + 0.01, bar.get_y() + bar.get_height()/2.,
+                 f'{round(val, 1)}', va='center', fontsize=10)
+    ax2.set_title("Top 8 Muscles (Force Moyenne)", fontsize=14, fontweight='bold')
+    ax2.set_xlabel("Force Moyenne (N)")
+    ax2.set_ylabel("Muscles")
+    ax2.grid(True, axis='x', alpha=0.3)
+
+    plt.tight_layout()
+    plt.show()
+
+def generate_bar_chart_analysis(muscles_to_analyze=None):
+    if muscles_to_analyze is None:
+        muscles_to_analyze = Muscles_Main
+
+    angle_ranges = [(10, 30), (30, 60), (60, 90), (90, 120)]
+    all_cases_data = extract_all_cases_data(Results, muscles_to_analyze, angle_ranges)
+    if not all_cases_data:
+        print("Aucune donnée disponible.")
+        return
+
+    type_cases = {case: case for case in all_cases_data.keys()}
+    case_colors = get_type_colors(type_cases)
+
+    create_horizontal_bar_chart(all_cases_data, muscles_to_analyze, angle_ranges, case_colors)
+    # create_summary_bar_chart(all_cases_data, muscles_to_analyze, angle_ranges, case_colors)
+
+
+# %% Exécution
 if __name__ == "__main__":
-    # Pour analyser tous les muscles en une seule fois
-    # generate_all_difference_graphs()
+    # Générer l'analyse complète avec les muscles principaux
+    generate_bar_chart_analysis(Muscles_Main)
+    
+    # Optionnel: analyser d'autres groupes
+    # generate_bar_chart_analysis(Muscles_Aux)
+    # generate_bar_chart_analysis(Muscles_Extra)
     
     # Si vous préférez analyser les muscles par catégorie, décommentez les lignes suivantes
     generate_all_difference_graphs(Muscles_Main)
-    generate_all_difference_graphs(Muscles_Aux)
-    generate_all_difference_graphs(Muscles_Extra)
+    # generate_all_difference_graphs(Muscles_Aux)
+    # generate_all_difference_graphs(Muscles_Extra)
+
