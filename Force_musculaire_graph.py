@@ -29,7 +29,9 @@ Muscles_Main = [
     "Deltoideus posterior",
     "Infraspinatus",
     "Supraspinatus",
-    "Subscapularis",
+     # "Subscapularis",
+    "Upper subscapularis", 
+    "Lower subscapularis",
     "Teres minor",
     # "Lower trapezius",
     # "Middle trapezius",
@@ -691,6 +693,7 @@ if __name__ == "__main__":
     generate_all_difference_graphs(Muscles_Main)
     # generate_all_difference_graphs(Muscles_Aux)
     # generate_all_difference_graphs(Muscles_Extra)
+
 
 
 
