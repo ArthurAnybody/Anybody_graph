@@ -1,6 +1,5 @@
 import os
-os.chdir(r"C:\Users\Documents\Python")
-
+os.chdir(r"C:\Users\Documents\Python") #chemin a modifier
 from Anybody_Package.Anybody_LoadOutput.Tools import load_results_from_file
 from Anybody_Package.Anybody_Graph.GraphFunctions import graph
 from Anybody_Package.Anybody_Graph.GraphFunctions import COP_graph
@@ -16,8 +15,6 @@ import pandas as pd
 import numpy as np
 import seaborn as sns  
 import re
-
-
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
@@ -34,7 +31,7 @@ def _load_results_with_selection():
     import os
     
     # Directory for saved simulations
-    SaveSimulationsDirectory = "C:/Users/Documents/Python/Saved Simulations"
+    SaveSimulationsDirectory = "C:/Users/Documents/Python/Saved Simulations"#chemin a modifier
     
     # If a selection file is specified, use it
     if SELECTED_RESULTS_FILE and os.path.exists(SELECTED_RESULTS_FILE):
@@ -56,7 +53,6 @@ def _load_results_with_selection():
 # Load results with selection handling
 Results = _load_results_with_selection()
 
-
 # %% Control the font size for graphs
 matplotlib.rcParams.update({'font.size': 14})
 matplotlib.rcParams.update({'axes.titlesize': 14})
@@ -67,7 +63,7 @@ matplotlib.rcParams.update({'ytick.labelsize': 14})
 matplotlib.rcParams.update({'legend.fontsize': 14})
 
 # %% Load results
-SaveSimulationsDirectory = "C:/Users/Documents/Python/Saved Simulations"
+SaveSimulationsDirectory = "C:/Users/Documents/Python/Saved Simulations"#chemin a modifier
 Results = load_results_from_file(SaveSimulationsDirectory, "Results")
 
 # %% Control the font size for graphs
@@ -156,7 +152,7 @@ def create_instability_ratio_comparison(results, ref_case, compare_case, specifi
         specific_angles: Specific angles for the table (default [10, 20, 40, 50, 60, 80, 100, 120])
     """
     if specific_angles is None:
-        specific_angles = [10, 20, 40, 50, 60, 80, 100, 120]
+        specific_angles = [10, 20,30,40, 50,55, 60, 80, 100, 120]
     
     # Extract data for both cases
     ref_abduction = results[ref_case]['Abduction']['Total']
@@ -303,62 +299,119 @@ def create_colored_table(df_table, ref_case, compare_case):
     plt.tight_layout(rect=[0, 0.07, 1, 0.95])
     # plt.savefig(f'instability_table_{ref_case}_vs_{compare_case}.png', dpi=300, bbox_inches='tight')
     plt.show()
+    
+import re
+
+def identify_case_types():
+    available_cases = list(Results.keys())
+
+    if not available_cases:
+        print("No cases available in the data")
+        return {}
+
+    print("\nAvailable cases in the data:")
+    for i, case_name in enumerate(available_cases):
+        print(f"{i+1}. {case_name}")
+
+    type_cases = {}
+
+    # Motifs pour repérer le cas de référence
+    reference_pattern = r'(ref(eren[ct]e)?|référence|Référencev3|reference_case|baseline|control|AnyBody Parameters|Ref_v\d+|Reference.*)'
+
+    reference_case = None
+    for case_name in available_cases:
+        if re.search(reference_pattern, case_name, re.IGNORECASE):
+            reference_case = case_name
+            type_cases['Reference'] = case_name
+            print(f"Reference case identified: {case_name}")
+            break
+
+    for case_name in available_cases:
+        if case_name != reference_case:
+            type_cases[case_name] = case_name
+            print(f"Case identified: {case_name}")
+
+    return type_cases
+
+
+from type_colors import FIXED_TYPE_COLORS  # Import ton dictionnaire de couleurs
+
+def get_type_colors(type_cases):
+    type_colors = {}
+    for type_key, case_name in type_cases.items():
+        if case_name in FIXED_TYPE_COLORS:
+            type_colors[type_key] = FIXED_TYPE_COLORS[case_name]
+        elif type_key == 'Reference':
+            type_colors[type_key] = FIXED_TYPE_COLORS['Reference']
+        else:
+            type_colors[type_key] = '#cccccc'  # couleur par défaut (gris clair)
+    return type_colors   
+    
 
 # %% Main function to analyze the instability ratio for all cases
 def analyze_instability_ratio_all_cases(specific_angles=None):
     """
     Analyzes the instability ratio for all cases compared to the reference
-    
-    Args:
-        specific_angles: Specific angles for the table (default [10, 20, 40, 50, 60, 80, 100, 120])
     """
     if specific_angles is None:
-        specific_angles = [10, 20, 40,50, 60, 80, 100, 120]
-    
-    # Identify the reference and cases to compare
+        specific_angles = [10, 20,30, 40, 50, 60, 80, 100, 120]
+
+    # Identify reference and compare cases
     ref_case, compare_cases = identify_reference_and_compare_cases(Results)
     
     if not ref_case:
         print("Cannot continue analysis without a reference case.")
         return
-    
+
     if not compare_cases:
         print("No cases to compare with the reference.")
         return
-    
-    # Calculate the instability ratio for all cases
+
+    # Identify case types to get fixed names
+    type_cases = identify_case_types()
+    type_colors = get_type_colors(type_cases)
+
+    # Calculate the instability ratio
     calculate_instability_ratio(Results)
-    
-    # Global graph of the instability ratio for all cases
-    from Anybody_Package.Anybody_Graph.GraphFunctions import graph
-    graph(Results, "Abduction", "Instability Ratio", "Instability Ratio", cases_on="all", composante_y=["Total"])
-    
-    # Create a combined figure for all cases
+
+    # Create plot
     plt.figure(figsize=(14, 8))
-    
-    # Extract reference data
+
+    # Plot reference
     ref_abduction = Results[ref_case]['Abduction']['Total']
     ref_instability = Results[ref_case]['Instability Ratio']['Total']
-    
-    # Plot the reference curve
-    plt.plot(ref_abduction, ref_instability, label=f'{ref_case}', color='black', linewidth=2.5)
-    
-    # Colors for different cases
-    colors = plt.cm.tab10(np.linspace(0, 1, len(compare_cases)))
-    
-    # Plot all comparison curves
-    for i, comp_case in enumerate(compare_cases):
+    plt.plot(
+        ref_abduction,
+        ref_instability,
+        label=f'{ref_case}',
+        color=type_colors.get('Reference', 'black'),
+        linewidth=2.5
+    )
+
+    # Plot comparison cases
+    for comp_case in compare_cases:
         comp_abduction = Results[comp_case]['Abduction']['Total']
         comp_instability = Results[comp_case]['Instability Ratio']['Total']
-        plt.plot(comp_abduction, comp_instability, label=f'{comp_case}', color=colors[i], linewidth=2)
-    
+
+        # Retrouver le "type" correspondant dans type_cases
+        # Attention ici : on cherche la **clé** dont la valeur == comp_case
+        case_key = next((k for k, v in type_cases.items() if v == comp_case), comp_case)
+        color = type_colors.get(case_key, '#cccccc')  # gris si pas trouvé
+
+        plt.plot(
+            comp_abduction,
+            comp_instability,
+            label=comp_case,
+            color=color,
+            linewidth=2
+        )
+
     plt.xlabel('Abduction angle (degrees)')
     plt.ylabel('Instability ratio')
     plt.title(f'Instability ratio: {ref_case} vs all cases')
     plt.grid(True, linestyle='--', alpha=0.7)
     plt.legend(loc='best')
     plt.tight_layout()
-    # plt.savefig('instability_ratio_all_cases.png', dpi=300, bbox_inches='tight')
     plt.show()
     
     # For each case to compare, create a comparison graph
@@ -396,3 +449,4 @@ def analyze_instability_ratio_all_cases(specific_angles=None):
 # %% Main execution
 if __name__ == "__main__":
     analyze_instability_ratio_all_cases()
+
