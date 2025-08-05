@@ -22,12 +22,6 @@ from type_colors import FIXED_TYPE_COLORS
 # Variable to store the path to a file with selected results
 SELECTED_RESULTS_FILE = None
 
-
-
-# %% Load results
-SaveSimulationsDirectory = "C:/Users/Documents/Python/Saved Simulations")# chemin a modfier
-Results = load_results_from_file(SaveSimulationsDirectory, "Results")
-
 # %% List of muscle categories
 Muscles_Main = [
     "Deltoideus anterior",
@@ -132,6 +126,9 @@ matplotlib.rcParams.update({'xtick.labelsize': 14})
 matplotlib.rcParams.update({'ytick.labelsize': 14})
 matplotlib.rcParams.update({'legend.fontsize': 14})
 
+# %% Load results
+SaveSimulationsDirectory = "C:/Users/Documents/Python/Saved Simulations")# chemin a modfier
+Results = load_results_from_file(SaveSimulationsDirectory, "Results")
 
 # %% Identification of reference case and all cases to compare
 def identify_reference_and_compare_cases(results):
@@ -694,5 +691,6 @@ if __name__ == "__main__":
     generate_all_difference_graphs(Muscles_Main)
     # generate_all_difference_graphs(Muscles_Aux)
     # generate_all_difference_graphs(Muscles_Extra)
+
 
 
